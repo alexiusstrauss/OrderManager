@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,6 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "drf_yasg",
+    "django_filters",
+    "rest_framework",
     "src.apps.remittances",
     'src.apps.sales',
     'src.apps.customers',
@@ -104,11 +108,41 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = 'static/'
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": None,
+    "USE_SESSION_AUTH": False,
+    "JSON_EDITOR": True,
+    "DEFAULT_MODEL_DEPTH": -1,  # Esconde seção models na UI
+}
+
+# Especifica os esquemas permitidos no ambiente de desenvolvimento
+REST_FRAMEWORK_SCHEMAS = ["http"]
+
+# Configurações de Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'stream': os.sys.stdout,
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

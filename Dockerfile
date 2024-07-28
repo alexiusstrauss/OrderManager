@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM python:3.12.4-slim-bullseye AS builder
+FROM python:3.10.10-slim-bullseye AS builder
 
 ENV APP_NAME=ordermanager-api
 ARG PROJECT_DIR=/app/backend
@@ -23,7 +23,7 @@ COPY requirements.txt ${PROJECT_DIR}/requirements.txt
 RUN pip install -r ${PROJECT_DIR}/requirements.txt
 
 # Stage 2: Run
-FROM python:3.12.4-slim-bullseye
+FROM python:3.10.10-slim-bullseye
 
 ENV APP_NAME=ordermanager-api
 ARG PROJECT_DIR=/app/backend
