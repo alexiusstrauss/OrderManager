@@ -1,49 +1,45 @@
-# Stage 1: Build
-FROM python:3.10.10-slim-bullseye AS builder
+FROM python:3.10.10-slim
 
-ENV APP_NAME=ordermanager-api
-ARG PROJECT_DIR=/app/backend
-WORKDIR ${PROJECT_DIR}
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV TZ America/Sao_Paulo
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONFAULTHANDLER=1
-ENV PYTHONUNBUFFERED=1
+ARG YOUR_ENV
 
-RUN apt-get update && apt-get install -y build-essential libpq-dev
+ENV YOUR_ENV=${YOUR_ENV} \
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=1.8.3 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_HOME='/usr/local'
 
-# Cria o ambiente virtual
-RUN python -m venv venv
+  RUN apt-get update && apt-get upgrade -y \
+  && apt-get install --no-install-recommends -y \
+    bash \
+    brotli \
+    build-essential \
+    curl \
+    gettext \
+    git \
+    libpq-dev \
+    # Installing `poetry` package manager:
+    && curl -sSL 'https://install.python-poetry.org' | python - \
+    && poetry --version \
+    # Cleaning cache:
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Ativa o ambiente virtual
-ENV PATH=${PROJECT_DIR}/venv/bin:$PATH
+# Copy only requirements to cache them in docker layer
+WORKDIR /app
+COPY poetry.lock pyproject.toml /app/
 
-COPY requirements.txt ${PROJECT_DIR}/requirements.txt
-RUN pip install -r ${PROJECT_DIR}/requirements.txt
+# Project initialization:
+RUN poetry install
 
-# Stage 2: Run
-FROM python:3.10.10-slim-bullseye
+# Creating folders, and files for a project:
+COPY ./backend /app
 
-ENV APP_NAME=ordermanager-api
-ARG PROJECT_DIR=/app/backend
-WORKDIR ${PROJECT_DIR}
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV TZ America/Sao_Paulo
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONFAULTHANDLER=1
-ENV PYTHONUNBUFFERED=1
 
-# Copia o ambiente virtual do builder
-COPY --from=builder ${PROJECT_DIR}/venv ${PROJECT_DIR}/venv
-
-# Ativa o ambiente virtual
-ENV PATH=${PROJECT_DIR}/venv/bin:$PATH
-
-# Copia apenas o código fonte da aplicação
-COPY ./backend ${PROJECT_DIR}
-
-EXPOSE 8000
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Rode o comando Poetry run python backend/manage.py runserver
+CMD ["poetry", "run", "python", "backend/manage.py", "runserver"]
