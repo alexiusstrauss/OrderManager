@@ -11,7 +11,7 @@ services:
       - PYTHONFAULTHANDLER=1
       - PYTHONUNBUFFERED=1
     volumes:
-      - ./backend:/backend
+      - ./backend:/app/
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/healthcheck/"]
       interval: 10s

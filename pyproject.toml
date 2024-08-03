@@ -5,6 +5,7 @@ description = ""
 authors = ["Alexius Strauss"]
 license = "Boost Software License"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10.10"
